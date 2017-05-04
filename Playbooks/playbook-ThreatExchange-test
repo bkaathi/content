@@ -1,0 +1,353 @@
+id: ThreatExchange-test
+version: 3
+name: ThreatExchange-test
+starttaskid: "0"
+tasks:
+  "0":
+    id: "0"
+    taskid: 8e9fa1d3-87b6-44f8-80e6-ee7b7b81906c
+    type: start
+    task:
+      id: 8e9fa1d3-87b6-44f8-80e6-ee7b7b81906c
+      version: -1
+      name: ""
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "1"
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 50
+        }
+      }
+  "1":
+    id: "1"
+    taskid: 796ef7e9-875c-4a39-8350-2d9769f2a8e5
+    type: regular
+    task:
+      id: 796ef7e9-875c-4a39-8350-2d9769f2a8e5
+      version: -1
+      name: ExtractIP
+      description: Extract IPs from the given text and place them both as output and
+        in the context of a playbook.
+      scriptName: ExtractIP
+      type: regular
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "2"
+    scriptarguments:
+      text: dsdsdsd 84.238.65.92  dffdfdfdf 8.8.8.8
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 195
+        }
+      }
+  "2":
+    id: "2"
+    taskid: 3ffb62fc-5c9f-4e86-88ea-89102103d3c9
+    type: regular
+    task:
+      id: 3ffb62fc-5c9f-4e86-88ea-89102103d3c9
+      version: -1
+      name: ip
+      description: Check IP Reputation
+      script: ThreatExchange|||ip
+      type: regular
+      iscommand: true
+      brand: ThreatExchange
+    nexttasks:
+      '#none#':
+      - "3"
+    scriptarguments:
+      headers: ""
+      ip: ${IP.Address}
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 370
+        }
+      }
+  "3":
+    id: "3"
+    taskid: 22df7f2d-ffdb-40b2-89a0-84f11c30a563
+    type: condition
+    task:
+      id: 22df7f2d-ffdb-40b2-89a0-84f11c30a563
+      version: -1
+      name: IsMaliciousIndicatorFound
+      description: Checks if the investigation found any Malicious File/URL/IP, if
+        so return yes, otherwise no.
+      scriptName: IsMaliciousIndicatorFound
+      type: condition
+      iscommand: false
+      brand: ""
+    nexttasks:
+      "no":
+      - "5"
+      "yes":
+      - "4"
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 545
+        }
+      }
+  "4":
+    id: "4"
+    taskid: 3649712a-caf6-443e-8cd4-7e2bf6073491
+    type: regular
+    task:
+      id: 3649712a-caf6-443e-8cd4-7e2bf6073491
+      version: -1
+      name: extractHash
+      scriptName: ExtractHash
+      type: regular
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "9"
+    scriptarguments:
+      text: ssdsd cb57e263ab51f8e9b40d6f292bb17512cec0aa701bde14df33dfc06c815be54c
+        ddd
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 720
+        }
+      }
+  "5":
+    id: "5"
+    taskid: 97da4498-e8f2-4f19-811e-8bf4104f7b69
+    type: title
+    task:
+      id: 97da4498-e8f2-4f19-811e-8bf4104f7b69
+      version: -1
+      name: wrong!!!
+      type: title
+      iscommand: false
+      brand: ""
+    view: |-
+      {
+        "position": {
+          "x": 695,
+          "y": 735
+        }
+      }
+  "6":
+    id: "6"
+    taskid: cfa954e7-7150-48ba-8892-e0ee93c2213d
+    type: condition
+    task:
+      id: cfa954e7-7150-48ba-8892-e0ee93c2213d
+      version: -1
+      name: is file malicious
+      scriptName: Exists
+      type: condition
+      iscommand: false
+      brand: ""
+    nexttasks:
+      "no":
+      - "8"
+      "yes":
+      - "11"
+    scriptarguments:
+      value: File(val.Malicious)
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 1070
+        }
+      }
+  "8":
+    id: "8"
+    taskid: 6a501f70-184f-40c4-83fc-ca893d17c71c
+    type: title
+    task:
+      id: 6a501f70-184f-40c4-83fc-ca893d17c71c
+      version: -1
+      name: Wrong2!!!
+      type: title
+      iscommand: false
+      brand: ""
+    view: |-
+      {
+        "position": {
+          "x": 50,
+          "y": 1260
+        }
+      }
+  "9":
+    id: "9"
+    taskid: 6882bd77-425b-4859-81fb-a36b2f8b1f2a
+    type: regular
+    task:
+      id: 6882bd77-425b-4859-81fb-a36b2f8b1f2a
+      version: -1
+      name: file
+      description: Check file reputation of the given hash
+      script: ThreatExchange|||file
+      type: regular
+      iscommand: true
+      brand: ThreatExchange
+    nexttasks:
+      '#none#':
+      - "6"
+    scriptarguments:
+      file: ${File.SHA256}
+      headers: ""
+      limit: ""
+      since: ""
+      until: ""
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 895
+        }
+      }
+  "10":
+    id: "10"
+    taskid: ed95748b-23b4-48ad-8d40-385f48d93b6e
+    type: regular
+    task:
+      id: ed95748b-23b4-48ad-8d40-385f48d93b6e
+      version: -1
+      name: Success
+      scriptName: Print
+      type: regular
+      iscommand: false
+      brand: ""
+    scriptarguments:
+      extend-context: result=
+      value: Success
+    view: |-
+      {
+        "position": {
+          "x": 695,
+          "y": 1770
+        }
+      }
+  "11":
+    id: "11"
+    taskid: 1bbb4d99-2351-4188-8270-cf1426bdbabd
+    type: regular
+    task:
+      id: 1bbb4d99-2351-4188-8270-cf1426bdbabd
+      version: -1
+      name: ExtractURL
+      description: Extract URLs from the given text and place them both as output
+        and in the context of a playbook. If given an object, will convert to JSON.
+      scriptName: ExtractURL
+      type: regular
+      iscommand: false
+      brand: ""
+    nexttasks:
+      '#none#':
+      - "12"
+    scriptarguments:
+      text: xxx---www.demisto.com---ttt
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 1245
+        }
+      }
+  "12":
+    id: "12"
+    taskid: 17362fbb-5b95-4170-856e-276f4a93a740
+    type: regular
+    task:
+      id: 17362fbb-5b95-4170-856e-276f4a93a740
+      version: -1
+      name: url
+      description: Check URL Reputation
+      script: ThreatExchange|||url
+      type: regular
+      iscommand: true
+      brand: ThreatExchange
+    nexttasks:
+      '#none#':
+      - "13"
+    scriptarguments:
+      headers: ""
+      limit: ""
+      since: ""
+      until: ""
+      url: ${URL}
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 1420
+        }
+      }
+  "13":
+    id: "13"
+    taskid: 7e0892eb-5656-45aa-8d37-d640dd534fd9
+    type: condition
+    task:
+      id: 7e0892eb-5656-45aa-8d37-d640dd534fd9
+      version: -1
+      name: is url malicious
+      scriptName: Exists
+      type: condition
+      iscommand: false
+      brand: ""
+    nexttasks:
+      "no":
+      - "10"
+      "yes":
+      - "14"
+    scriptarguments:
+      value: ${URL(val.Malicious)}
+    view: |-
+      {
+        "position": {
+          "x": 480,
+          "y": 1595
+        }
+      }
+  "14":
+    id: "14"
+    taskid: 3b6954ae-f9af-4a90-84c2-50b5c20956c1
+    type: title
+    task:
+      id: 3b6954ae-f9af-4a90-84c2-50b5c20956c1
+      version: -1
+      name: Wrong!! found malicious URL , but given url is clean
+      type: title
+      iscommand: false
+      brand: ""
+    view: |-
+      {
+        "position": {
+          "x": 265,
+          "y": 1785
+        }
+      }
+view: |-
+  {
+    "linkLabelsPosition": {},
+    "paper": {
+      "dimensions": {
+        "height": 1815,
+        "width": 1025,
+        "x": 50,
+        "y": 50
+      }
+    }
+  }
+inputs: []
