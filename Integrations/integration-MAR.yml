@@ -11,7 +11,7 @@ detaileddescription: |-
   Repository: [https://github.com/opendxl](https://github.com/opendxl)
   Documentation: [https://opendxl.github.io/opendxl-mar-client-python/pydoc](https://opendxl.github.io/opendxl-mar-client-python/pydoc)
 
-  Dependencies (Python packages):
+  Dependencies (Python packages) - using "pip install" or clone and install:
   dxlclient
   dxlmarclient
 configuration:
@@ -61,5 +61,36 @@ script:
   type: python
   commands:
   - name: search
-    arguments: []
+    arguments:
+    - name: collector
+      required: true
+      auto: PREDEFINED
+      predefined:
+      - CommandLineHistory
+      - CurrentFlow
+      - DNSCache
+      - EnvironmentVariables
+      - Files
+      - HostEntries
+      - HostInfo
+      - InstalledCertificates
+      - InstalledDrivers
+      - InstalledUpdates
+      - InteractiveSessions
+      - LocalGroups
+      - LoggedInUsers
+      - NetworkFlow
+      - NetworkInterfaces
+      - NetworkSessions
+      - NetworkShares
+      - Processes
+      - ScheduledTasks
+      - Services
+      - Software
+      - Startup
+      - UsbConnectedStorageDevices
+      - UserProfiles
+      - WinRegistry
+      description: The collector to query
+    description: Search endpoint data
 hidden: false
