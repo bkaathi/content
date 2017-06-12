@@ -9,7 +9,8 @@ description: Connect to MAR using its DXL client
 detaileddescription: |-
   Connect to McAfee Active Response (MAR) using the DXL MAR client.
   Repository: [https://github.com/opendxl](https://github.com/opendxl)
-  Documentation: [https://opendxl.github.io/opendxl-mar-client-python/pydoc](https://opendxl.github.io/opendxl-mar-client-python/pydoc)
+  API Documentation: [https://opendxl.github.io/opendxl-mar-client-python/pydoc](https://opendxl.github.io/opendxl-mar-client-python/pydoc)
+  Collectors output is described in the [product document](https://kc.mcafee.com/resources/sites/MCAFEE/content/live/PRODUCT_DOCUMENTATION/26000/PD26820/en_US/mar_200_pg_0-00_en-us.pdf).
 
   Dependencies (Python packages) - using "pip install" or clone and install:
   dxlclient
@@ -21,12 +22,26 @@ configuration:
   type: 0
   required: true
 script:
-  script: |-
+  script: |
     from dxlclient.client_config import DxlClientConfig
     from dxlclient.client import DxlClient
-    from dxlmarclient import MarClient
+    from dxlmarclient import MarClient, ResultConstants, ProjectionConstants, \
+        ConditionConstants, SortConstants, OperatorConstants
 
-    def search():
+    FILTER_OPERATORS = {
+        'GreaterEqualThan': QEOperatorConstants.GREATER_EQUAL_THAN,
+        'GreaterThan': OperatorConstants.GREATER_THAN,
+        'LessEqualThan': OperatorConstants.LESS_EQUAL_THAN,
+        'LessThan': OperatorConstants.LESS_THAN,
+        'Equals': OperatorConstants.EQUALS,
+        'Contains': OperatorConstants.CONTAINS,
+        'StartWith': OperatorConstants.STARTS_WITH,
+        'EndsWith': OperatorConstants.ENDS_WITH,
+        'Before': OperatorConstants.BEFORE,
+        'After': OperatorConstants.AFTER
+    }
+
+    def search(collector, outputs, filter_by, filter_operator, filter_value):
         # TODO: get the configuration (.crt and .key. files and brokers) from the instance
         # information is in the corresponding GitHub issue
         config = DxlClientConfig.create_dxl_config_from_file(CONFIG_FILE)
@@ -35,18 +50,50 @@ script:
             client.connect()
             mar_client = MarClient(client)
 
-            result_context = mar_client.search(
+            # EXAMPLE: #
+            # Read the product document for more exampels.
+            # Search query example (in the UI): "Processes name, id where Processes threadCount greater equal than 10"
+            # collector = Processes
+            # outputs = ['name', 'id']
+            # conditions = "Processes threadCount greater equal than 10"
+            #
+            # result_context = mar_client.search(
+            #     projections=[{
+            #         ProjectionConstants.NAME: 'HostInfo',
+            #         ProjectionConstants.OUTPUTS: ['ip_address']
+            #     }],
+            #     conditions={
+            #         ConditionConstants.OR: [{
+            #             ConditionConstants.AND: [{
+            #                 ConditionConstants.COND_NAME: "HostInfo",
+            #                 ConditionConstants.COND_OUTPUT: "ip_address",
+            #                 ConditionConstants.COND_OP: OperatorConstants.EQUALS,
+            #                 ConditionConstants.COND_VALUE: HOST_IP
+            #             }]
+            #         }]
+            #     }
+            # )
+
+            results_context = marclient.search(
                 projections=[{
-                    'name': 'HostInfo',
-                    'outputs': ['ip_address']
-                }]
+                    ProjectionConstants.NAME: collector,
+                    ProjectionConstants.OUTPUTS: outputs
+                }],
+                conditions={
+                    ConditionConstants.COND_NAME: collector,
+                    ConditionConstants.COND_OUTPUT: filter_by,
+                    ConditionConstants.COND_OP: FILTER_OPERATORS[filter_operator],
+                    ConditionConstants.COND_VALUE: filter_value
+                }
             )
 
             if result_context.has_results:
                 search_result = result_context.get_results(limit=10)
-                for item in search_result['items']:
+                return search_result['items']
+                # for item in search_result['items']:
                     # print "    " + item['output']['HostInfo|ip_address']
-                    pass
+            else:
+                return 'No results found.'
 
             return search_result['items']
 
@@ -57,10 +104,18 @@ script:
             sys.exit(0)
 
         elif demisto.command() == 'mar-search':
-            search()
+            results = search(
+                demisto.args()['collector'],
+                demisto.args(['outputs']),
+                demisto.args(['filter-by']),
+                demisto.args(['filter-operator']),
+                demisto.args(['filter-value'])
+            )
+            demisto.results(results)
+            sys.exit(0)
   type: python
   commands:
-  - name: search
+  - name: mar-search
     arguments:
     - name: collector
       required: true
@@ -92,5 +147,27 @@ script:
       - UserProfiles
       - WinRegistry
       description: The collector to query
+    - name: fields
+      required: true
+      description: The fields (output) of the collector to query
+      isArray: true
+    - name: filter-by
+      description: Field name to filter by
+    - name: filter-operator
+      auto: PREDEFINED
+      predefined:
+      - GreaterEqualThan
+      - GreaterThan
+      - LessEqualThan
+      - LessThan
+      - Equals
+      - Contains
+      - StartsWith
+      - EndsWith
+      - Before
+      - After
+      description: Filtering operator
+    - name: filter-value
+      description: Filtering value
     description: Search endpoint data
 hidden: false
