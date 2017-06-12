@@ -92,10 +92,8 @@ script:
                 return search_result['items']
                 # for item in search_result['items']:
                     # print "    " + item['output']['HostInfo|ip_address']
-            else:
-                return 'No results found.'
 
-            return search_result['items']
+            return 'No results found.'
 
 
     if __name__ == '__main__':
